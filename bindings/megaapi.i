@@ -47,106 +47,7 @@ static inline jclass megajni_new_global_ref_class(JNIEnv* env, jclass local, con
 jint on_load(JavaVM *jvm, void *reserved)
 {
     MEGAjvm = jvm;
-    JNIEnv* jenv = NULL;
-    jvm->GetEnv((void**)&jenv, JNI_VERSION_1_6);
 
-    jclass clsStringLocal = jenv->FindClass("java/lang/String");
-    clsString = (jclass)jenv->NewGlobalRef(clsStringLocal);
-    jenv->DeleteLocalRef(clsStringLocal);
-    ctorString = jenv->GetMethodID(clsString, "<init>", "([BLjava/lang/String;)V");
-    getBytes = jenv->GetMethodID(clsString, "getBytes", "(Ljava/lang/String;)[B");
-    jstring strEncodeUTF8Local = jenv->NewStringUTF("UTF-8");
-    strEncodeUTF8 = (jstring)jenv->NewGlobalRef(strEncodeUTF8Local);
-    jenv->DeleteLocalRef(strEncodeUTF8Local);
-
-    jclass localfileWrapper = jenv->FindClass("mega/privacy/android/data/filewrapper/FileWrapper");
-    if (!localfileWrapper)
-    {
-        jenv->ExceptionDescribe();
-        jenv->ExceptionClear();
-    }
-
-    fileWrapper = megajni_new_global_ref_class(jenv, localfileWrapper, "global ref FileWrapper");
-    if (localfileWrapper) jenv->DeleteLocalRef(localfileWrapper);
-
-    jclass localIntegerClass = jenv->FindClass("java/lang/Integer");
-    if (!localIntegerClass)
-    {
-        jenv->ExceptionDescribe();
-        jenv->ExceptionClear();
-    }
-
-    integerClass = megajni_new_global_ref_class(jenv, localIntegerClass, "global ref Integer");
-    if (localIntegerClass) jenv->DeleteLocalRef(localIntegerClass);
-
-    jclass localArrayListClass = jenv->FindClass("java/util/ArrayList");
-    if (!localArrayListClass)
-    {
-        jenv->ExceptionDescribe();
-        jenv->ExceptionClear();
-    }
-
-    arrayListClass = megajni_new_global_ref_class(jenv, localArrayListClass, "global ref ArrayList");
-    if (localArrayListClass) jenv->DeleteLocalRef(localArrayListClass);
-
-    return JNI_VERSION_1_6;
-}
-
-} // namespace megajni
-
-#ifdef SDKLIB_ONLOAD
-extern "C" jint JNIEXPORT JNICALL JNI_OnLoad(JavaVM *jvm, void *reserved)
-{
-    return megajni::on_load(jvm, reserved);
-}
-#endif // SDKLIB_ONLOAD
-
-#endif // SWIGJAVA
-%}
-
-#ifdef SWIGJAVA
-
-//Automatic load of the native library
-%pragma(java) jniclasscode=%{
-  static {
-        try {
-            System.loadLibrary("mega");
-        } catch (UnsatisfiedLinkError e1) {
-            try {
-                System.load(System.getProperty("user.dir") + "/libmega.so");
-            } catch (UnsatisfiedLinkError e2) {
-                try {
-                    System.load(System.getProperty("user.dir") + "/libs/libmegajava.so");
-                } catch (UnsatisfiedLinkError e3) {
-                    try {
-                        System.load(System.getProperty("user.dir") + "/libs/mega.dll");
-                    } catch (UnsatisfiedLinkError e4) {
-                        try {
-                            System.load(System.getProperty("user.dir") + "/libmega.dylib");
-                        } catch (UnsatisfiedLinkError e5) {
-                            try {
-                                System.load(System.getProperty("user.dir") + "/libs/libmegajava.dylib");
-                            } catch (UnsatisfiedLinkError e6) {
-                                System.err.println("Native code library failed to load. \n" + e1 + "\n" + e2 + "\n" + e3 + "\n" + e4 + "\n" + e5 + "\n" + e6);
-                                System.exit(1);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-%}
-
-%exception {
-  // If a Java exception is already pending when entering native, clear it so JNI is usable.
-  megajni::megajni_clear_pending_exception(jenv, "pre-native-entry");
-
-  try {
-    $action
-  } catch (const std::exception& e) {
-    jclass ex = jenv->FindClass("java/lang/RuntimeException");
-    if (ex) jenv->ThrowNew(ex, e.what());
     // leave with a Java exception pending; JNI will return safely to JVM
   } catch (...) {
     jclass ex = jenv->FindClass("java/lang/RuntimeException");
@@ -436,115 +337,120 @@ extern "C" jint JNIEXPORT JNICALL JNI_OnLoad(JavaVM *jvm, void *reserved)
 %ignore mega::SynchronousTransferListener;
 %ignore mega::MegaUser::CHANGE_TYPE_RECENT_CLEAR_TIMESTAMP;
 
+#ifdef SWIGJAVA
 %extend mega::MegaUser {
-  %proxycode %{
-  /*
-  * Manually injected constants resolved the uint64_t overflow issue.
-  */
-  public final static long CHANGE_TYPE_RECENT_CLEAR_TIMESTAMP = 0x100000000L;
-  %}
+    %proxycode %{
+    /*
+    * Manually injected constants resolved the uint64_t overflow issue.
+    */
+    public final static long CHANGE_TYPE_RECENT_CLEAR_TIMESTAMP = 0x100000000L;
+    %}
 }
+#endif
 
 %newobject mega::MegaError::copy;
 %newobject mega::MegaRequest::copy;
 %newobject mega::MegaTransfer::copy;
-%newobject mega::MegaTransferList::copy;
-%newobject mega::MegaNode::copy;
-%newobject mega::MegaNodeList::copy;
-%newobject mega::MegaChildrenList::copy;
-%newobject mega::MegaShare::copy;
-%newobject mega::MegaShareList::copy;
-%newobject mega::MegaUser::copy;
-%newobject mega::MegaUserList::copy;
-%newobject mega::MegaSetElement::copy;
-%newobject mega::MegaSet::copy;
-%newobject mega::MegaEvent::copy;
-%newobject mega::MegaSync::copy;
-%newobject mega::MegaSyncStats::copy;
-%newobject mega::MegaRecentActionBucket::copy;
-%newobject mega::MegaRecentActionBucketList::copy;
-%newobject mega::MegaSyncStall::copy;
-%newobject mega::MegaSyncStallList::copy;
-%newobject mega::MegaStringMap::copy;
-%newobject mega::MegaContactRequest::copy;
-%newobject mega::MegaContactRequestList::copy;
-%newobject mega::MegaStringList::copy;
-%newobject mega::MegaAchievementsDetails::copy;
-%newobject mega::MegaTimeZoneDetails::copy;
-%newobject mega::MegaUserAlert::copy;
-%newobject mega::MegaUserAlertList::copy;
-%newobject mega::MegaAchievementsDetails::getAwardEmails;
-%newobject mega::MegaTransfer::getPublicMegaNode;
+#ifdef SWIGJAVA
+%feature("director:before") {
+    jenv->PushLocalFrame(32); // adjust number based on expected refs per callback
+}
 
-%newobject mega::MegaApi::getBase64PwKey;
-%newobject mega::MegaApi::getStringHash;
-%newobject mega::MegaApi::handleToBase64;
-%newobject mega::MegaApi::userHandleToBase64;
-%newobject mega::MegaApi::dumpSession;
-%newobject mega::MegaApi::dumpXMPPSession;
-%newobject mega::MegaApi::getMyEmail;
-%newobject mega::MegaApi::getMyUserHandle;
-%newobject mega::MegaApi::getMyUser;
-%newobject mega::MegaApi::getMyXMPPJid;
-%newobject mega::MegaApi::getMyFingerprint;
-%newobject mega::MegaApi::exportMasterKey;
-%newobject mega::MegaApi::getTransfers;
-%newobject mega::MegaApi::getTransferByTag;
-%newobject mega::MegaApi::getTransferData;
-%newobject mega::MegaApi::getChildTransfers;
-%newobject mega::MegaApi::getChildren;
-%newobject mega::MegaApi::getChildNode;
-%newobject mega::MegaApi::getParentNode;
-%newobject mega::MegaApi::getNodePath;
-%newobject mega::MegaApi::getNodePathByNodeHandle;
-%newobject mega::MegaApi::getNodeByPath;
-%newobject mega::MegaApi::getNodeByHandle;
-%newobject mega::MegaApi::getContactRequestByHandle;
-%newobject mega::MegaApi::getContacts;
-%newobject mega::MegaApi::getContact;
-%newobject mega::MegaApi::getUserAlerts;
-%newobject mega::MegaApi::getInShares;
-%newobject mega::MegaApi::getInSharesList;
-%newobject mega::MegaApi::getOutShares;
-%newobject mega::MegaApi::getPendingOutShares;
-%newobject mega::MegaApi::getPublicLinks;
-%newobject mega::MegaApi::getIncomingContactRequests;
-%newobject mega::MegaApi::getOutgoingContactRequests;
-%newobject mega::MegaApi::getFingerprint;
-%newobject mega::MegaApi::getNodeByFingerprint;
-%newobject mega::MegaApi::getNodesByFingerprint;
-%newobject mega::MegaApi::getNodesByOriginalFingerprint;
-%newobject mega::MegaApi::getExportableNodeByFingerprint;
-%newobject mega::MegaApi::getCRC;
-%newobject mega::MegaApi::getNodeByCRC;
-%newobject mega::MegaApi::getRootNode;
-%newobject mega::MegaApi::getInboxNode;
-%newobject mega::MegaApi::getRubbishNode;
-%newobject mega::MegaApi::escapeFsIncompatible;
-%newobject mega::MegaApi::unescapeFsIncompatible;
-%newobject mega::MegaApi::base64ToBase32;
-%newobject mega::MegaApi::base32ToBase64;
-%newobject mega::MegaApi::search;
-%newobject mega::MegaApi::getCRCFromFingerprint;
-%newobject mega::MegaApi::getSessionTransferURL;
-%newobject mega::MegaApi::getAccountAuth;
-%newobject mega::MegaApi::authorizeNode;
-%newobject mega::MegaApi::getSyncs;
-%newobject mega::MegaApi::getEnabledNotifications;
-%newobject mega::MegaApi::getMimeType;
-%newobject mega::MegaApi::isNodeSyncableWithError;
-%newobject mega::MegaApi::getVersions;
+%feature("director:after") {
+    jenv->PopLocalFrame(nullptr);
+    MEGAJNI_CHECK(jenv, "director PopLocalFrame");
+}
 
-%newobject mega::MegaApi::getAutoProxySettings;
-%newobject mega::MegaApi::getOverquotaWarningsTs;
-%newobject mega::MegaApi::getMyCredentials;
-%newobject mega::MegaApi::getUserAvatarColor;
-%newobject mega::MegaApi::getUserAvatarSecondaryColor;
-%newobject mega::MegaApi::getDeviceId;
-%newobject mega::MegaApi::getFirstTransfer;
-%newobject mega::MegaApi::getTransferByUniqueId;
-%newobject mega::MegaApi::getAllNodeTags;
+#ifdef __ANDROID__
+%feature("director:except") {
+    if (jenv->ExceptionCheck()) {
+        jthrowable pending = jenv->ExceptionOccurred();
+        jenv->ExceptionClear();
 
+        // Use the app's class loader to reliably find the Kotlin class on any thread
+        jclass reporterClass = nullptr;
+        jclass activityThread = jenv->FindClass("android/app/ActivityThread");
+        if (activityThread) {
+            jmethodID currentApp = jenv->GetStaticMethodID(
+                activityThread,
+                "currentApplication",
+                "()Landroid/app/Application;"
+            );
+            jobject app = jenv->CallStaticObjectMethod(activityThread, currentApp);
+            if (app) {
+                jclass appClass = jenv->GetObjectClass(app);
+                jmethodID getClassLoader = jenv->GetMethodID(
+                    appClass,
+                    "getClassLoader",
+                    "()Ljava/lang/ClassLoader;"
+                );
+                jobject loader = jenv->CallObjectMethod(app, getClassLoader);
+                if (loader) {
+                    jclass loaderClass = jenv->FindClass("java/lang/ClassLoader");
+                    jmethodID loadClass = jenv->GetMethodID(
+                        loaderClass,
+                        "loadClass",
+                        "(Ljava/lang/String;)Ljava/lang/Class;"
+                    );
+                    jstring className = jenv->NewStringUTF("mega.privacy.android.app.jni.JniExceptionReporter");
+                    reporterClass = (jclass) jenv->CallObjectMethod(loader, loadClass, className);
+
+                    jenv->DeleteLocalRef(className);
+                    jenv->DeleteLocalRef(loaderClass);
+                    jenv->DeleteLocalRef(loader);
+                }
+                jenv->DeleteLocalRef(appClass);
+                jenv->DeleteLocalRef(app);
+            }
+            jenv->DeleteLocalRef(activityThread);
+        }
+
+        __android_log_print(ANDROID_LOG_ERROR, "MEGAJNI",
+            "JniExceptionReporter class %sfound", reporterClass ? "" : "NOT ");
+
+        if (reporterClass) {
+            jfieldID handlerField = jenv->GetStaticFieldID(
+                reporterClass, "handler", "Lmega/privacy/android/app/jni/JniExceptionHandler;"
+            );
+            jobject handler = jenv->GetStaticObjectField(reporterClass, handlerField);
+            if (handler) {
+                jclass handlerClass = jenv->GetObjectClass(handler);
+                jmethodID onException = jenv->GetMethodID(
+                    handlerClass,
+                    "onJniException",
+                    "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V"
+                );
+
+                if (onException) {
+                    jclass throwableClass = jenv->GetObjectClass(pending);
+                    jmethodID getMessage = jenv->GetMethodID(throwableClass, "getMessage", "()Ljava/lang/String;");
+                    jmethodID toString = jenv->GetMethodID(throwableClass, "toString", "()Ljava/lang/String;");
+                    jstring jmsg = (jstring) jenv->CallObjectMethod(pending, getMessage);
+                    jstring jstack = (jstring) jenv->CallObjectMethod(pending, toString);
+
+                    jstring jlocation = jenv->NewStringUTF("$action");
+
+                    jenv->CallVoidMethod(handler, onException, jlocation, jmsg, jstack);
+
+                    jenv->DeleteLocalRef(jlocation);
+                    jenv->DeleteLocalRef(jmsg);
+                    jenv->DeleteLocalRef(jstack);
+                    jenv->DeleteLocalRef(throwableClass);
+                }
+
+                jenv->DeleteLocalRef(handlerClass);
+                jenv->DeleteLocalRef(handler);
+            }
+
+            jenv->DeleteLocalRef(reporterClass);
+        }
+
+        jenv->DeleteLocalRef(pending);
+    }
+}
+#endif // __ANDROID__
+
+#endif // SWIGJAVA
 %newobject mega::MegaRequest::getPublicMegaNode;
 %newobject mega::MegaRequest::getMegaTimeZoneDetails;
 %newobject mega::MegaRequest::getMegaAccountDetails;
