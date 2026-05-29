@@ -6,7 +6,7 @@
 #include <android/log.h>
 #endif // __ANDROID__
 
-#ifdef SWIGJAVA
+%ifdef SWIGJAVA
 #include <jni.h>
 
 extern JavaVM* MEGAjvm;
@@ -153,7 +153,7 @@ jint on_load(JavaVM *jvm, void *reserved)
 
 %javamethodmodifiers copy ""
 
-#endif
+%endif
 
 %feature("director:before") {
     jenv->PushLocalFrame(32); // adjust number based on expected refs per callback
@@ -262,7 +262,7 @@ jint on_load(JavaVM *jvm, void *reserved)
 %feature("director") mega::MegaLogger;
 
 
-#ifdef SWIGJAVA
+%ifdef SWIGJAVA
 #if SWIG_VERSION < 0x030000
 %typemap(directorargout) (const char *time, int loglevel, const char *source, const char *message)
 %{
@@ -270,7 +270,7 @@ jint on_load(JavaVM *jvm, void *reserved)
 	jenv->DeleteLocalRef(jsource);
 	jenv->DeleteLocalRef(jmessage); 
 %}
-#endif
+%endif
 
 %apply (char *STRING, size_t LENGTH) {(char *buffer, size_t size)};
 
@@ -293,14 +293,14 @@ jint on_load(JavaVM *jvm, void *reserved)
 %feature("director") mega::MegaTreeProcessor;
 %feature("director") mega::MegaGfxProcessor;
 
-#ifdef SWIGJAVA
+%ifdef SWIGJAVA
 
 #if SWIG_VERSION < 0x030000
 %typemap(directorargout) (const char* path)
 %{ 
 	jenv->DeleteLocalRef(jpath); 
 %}
-#endif
+%endif
 
 %apply (char *STRING, size_t LENGTH) {(char *bitmapData, size_t size)};
 %typemap(directorin, descriptor="[B") (char *bitmapData, size_t size)
@@ -337,7 +337,7 @@ jint on_load(JavaVM *jvm, void *reserved)
 %ignore mega::SynchronousTransferListener;
 %ignore mega::MegaUser::CHANGE_TYPE_RECENT_CLEAR_TIMESTAMP;
 
-#ifdef SWIGJAVA
+%ifdef SWIGJAVA
 %extend mega::MegaUser {
     %proxycode %{
     /*
@@ -346,12 +346,12 @@ jint on_load(JavaVM *jvm, void *reserved)
     public final static long CHANGE_TYPE_RECENT_CLEAR_TIMESTAMP = 0x100000000L;
     %}
 }
-#endif
+%endif
 
 %newobject mega::MegaError::copy;
 %newobject mega::MegaRequest::copy;
 %newobject mega::MegaTransfer::copy;
-#ifdef SWIGJAVA
+%ifdef SWIGJAVA
 %feature("director:before") {
     jenv->PushLocalFrame(32); // adjust number based on expected refs per callback
 }
@@ -450,7 +450,7 @@ jint on_load(JavaVM *jvm, void *reserved)
 }
 #endif // __ANDROID__
 
-#endif // SWIGJAVA
+%endif // SWIGJAVA
 %newobject mega::MegaRequest::getPublicMegaNode;
 %newobject mega::MegaRequest::getMegaTimeZoneDetails;
 %newobject mega::MegaRequest::getMegaAccountDetails;

@@ -2,6 +2,10 @@ find_package(SWIG REQUIRED)
 set(UseSWIG_MODULE_VERSION 2)
 include(UseSWIG)
 
+if(DEFINED PYTHON3_EXECUTABLE AND NOT DEFINED Python3_EXECUTABLE)
+    set(Python3_EXECUTABLE "${PYTHON3_EXECUTABLE}" CACHE FILEPATH "Python 3 interpreter" FORCE)
+endif()
+
 find_package(Python3 REQUIRED COMPONENTS Interpreter Development.Module)
 
 # Set the output directory for generated Python files
@@ -23,7 +27,7 @@ if(USE_LIBUV)
     list(APPEND ADDITIONAL_SWIG_DEFINES -DHAVE_LIBUV)
 endif()
 
-set(SWIG_COMPILE_OPTIONS -c++;-py3;-DPY3)
+set(SWIG_COMPILE_OPTIONS -c++;-py3;-DPY3;-I${CMAKE_CURRENT_LIST_DIR}/../../include)
 list(APPEND SWIG_COMPILE_OPTIONS ${ADDITIONAL_SWIG_DEFINES})
 set_property(SOURCE ${SWIG_INTERFACE_FILE} PROPERTY SWIG_COMPILE_OPTIONS ${SWIG_COMPILE_OPTIONS})
 
