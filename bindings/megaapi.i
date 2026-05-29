@@ -489,4 +489,4 @@ typedef long long int32_t;
 
 %include "std_string.i"
 
-%include "megaapi.h"
+%include "../include/megaapi.h"

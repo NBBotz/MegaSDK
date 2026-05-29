@@ -27,14 +27,9 @@ if(USE_LIBUV)
     list(APPEND ADDITIONAL_SWIG_DEFINES -DHAVE_LIBUV)
 endif()
 
-set(SWIG_COMPILE_OPTIONS -c++;-py3;-DPY3;-I${CMAKE_CURRENT_LIST_DIR}/../../include)
+set(SWIG_COMPILE_OPTIONS -c++;-py3;-DPY3)
 list(APPEND SWIG_COMPILE_OPTIONS ${ADDITIONAL_SWIG_DEFINES})
 set_property(SOURCE ${SWIG_INTERFACE_FILE} PROPERTY SWIG_COMPILE_OPTIONS ${SWIG_COMPILE_OPTIONS})
-
-# Ensure SWIG itself receives the include path (some CMake+SWIG generators
-# don't always propagate source properties to the swig invocation).
-set(CMAKE_SWIG_FLAGS "${CMAKE_SWIG_FLAGS} -I${CMAKE_CURRENT_LIST_DIR}/../../include")
-set_property(SOURCE ${SWIG_INTERFACE_FILE} PROPERTY SWIG_FLAGS "${CMAKE_SWIG_FLAGS}")
 
 # Generate Python bindings
 swig_add_library(SDKPythonBindings
