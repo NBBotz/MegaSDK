@@ -49,13 +49,10 @@ static inline jclass megajni_new_global_ref_class(JNIEnv* env, jclass local, con
 
 jint on_load(JavaVM *jvm, void *reserved)
 {
+        (void)reserved;
     MEGAjvm = jvm;
 
-    // leave with a Java exception pending; JNI will return safely to JVM
-  } catch (...) {
-    jclass ex = jenv->FindClass("java/lang/RuntimeException");
-    if (ex) jenv->ThrowNew(ex, "Native code threw an unknown exception");
-  }
+        return JNI_VERSION_1_6;
 }
 
 %}
@@ -156,7 +153,10 @@ jint on_load(JavaVM *jvm, void *reserved)
     }
 }
 
+// Java-only directive: hide from non-Java SWIG runs
+#ifdef SWIGJAVA
 %javamethodmodifiers copy ""
+#endif
 
 #endif
 
