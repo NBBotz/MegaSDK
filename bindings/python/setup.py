@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import os
 import re
 from pathlib import Path
 from setuptools import setup
@@ -9,7 +10,22 @@ def read(fname):
 
 
 def get_version():
+    # Try to find version.h in the source tree
     version_path = Path(__file__).resolve().parents[2] / "include" / "mega" / "version.h"
+    
+    # If not found (when running from build dir), try looking in common relative locations
+    if not version_path.exists():
+        # Check if MEGA_SOURCE_DIR is set (for CI builds)
+        source_dir = os.environ.get("MEGA_SOURCE_DIR")
+        if source_dir:
+            version_path = Path(source_dir) / "include" / "mega" / "version.h"
+        else:
+            # Fall back to a default version if the file cannot be found
+            return "0.0.0"
+    
+    if not version_path.exists():
+        return "0.0.0"
+    
     version_file = version_path.read_text(encoding="utf-8")
 
     major_match = re.search(r"#define\s+MEGA_MAJOR_VERSION\s+(\d+)", version_file)
