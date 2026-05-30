@@ -83,7 +83,9 @@ configure_file(${CMAKE_CURRENT_LIST_DIR}/setup.py ${PYTHON_OUTPUT_DIR}/setup.py 
 configure_file(${CMAKE_CURRENT_LIST_DIR}/DESCRIPTION.rst ${PYTHON_OUTPUT_DIR}/DESCRIPTION.rst COPYONLY)
 configure_file(${CMAKE_CURRENT_LIST_DIR}/__init__.py ${PYTHON_OUTPUT_DIR}/__init__.py COPYONLY)
 configure_file(${CMAKE_CURRENT_LIST_DIR}/MANIFEST.in ${PYTHON_OUTPUT_DIR}/MANIFEST.in COPYONLY)
-configure_file(${CMAKE_CURRENT_LIST_DIR}/pyproject.toml ${PYTHON_OUTPUT_DIR}/pyproject.toml COPYONLY)
+if(EXISTS ${CMAKE_CURRENT_LIST_DIR}/pyproject.toml)
+    configure_file(${CMAKE_CURRENT_LIST_DIR}/pyproject.toml ${PYTHON_OUTPUT_DIR}/pyproject.toml COPYONLY)
+endif()
 
 # Copy version header for setup.py to read
 file(MAKE_DIRECTORY ${PYTHON_OUTPUT_DIR}/../../include/mega)
