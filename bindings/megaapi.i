@@ -160,6 +160,7 @@ jint on_load(JavaVM *jvm, void *reserved)
 
 #endif
 
+#ifdef SWIGJAVA
 %feature("director:before") {
     jenv->PushLocalFrame(32); // adjust number based on expected refs per callback
 }
@@ -257,6 +258,21 @@ jint on_load(JavaVM *jvm, void *reserved)
     }
 }
 #endif // __ANDROID__
+#elif defined(SWIGPYTHON)
+%feature("director:before") {
+    PyGILState_STATE gstate = PyGILState_Ensure();
+}
+
+%feature("director:after") {
+    PyGILState_Release(gstate);
+}
+
+%feature("director:except") {
+    if ($error) {
+        PyErr_Print();
+    }
+}
+#endif
 
 
 
