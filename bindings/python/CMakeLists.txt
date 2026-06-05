@@ -72,6 +72,27 @@ target_link_libraries(SDKPythonBindings
     MEGA::SDKlib
 )
 
+add_custom_command(
+    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/.director_gil_patched
+    COMMAND ${Python3_EXECUTABLE}
+            ${CMAKE_CURRENT_SOURCE_DIR}/patch_director_gil.py
+            ${CMAKE_CURRENT_BINARY_DIR}/megaapiPYTHON_wrap.cxx
+    COMMAND ${CMAKE_COMMAND} -E touch
+            ${CMAKE_CURRENT_BINARY_DIR}/.director_gil_patched
+    DEPENDS SDKPythonBindings_swig_compilation
+    COMMENT "Applying Python 3.14 director GIL patch"
+)
+
+add_custom_target(
+    patch_swig_directors
+    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/.director_gil_patched
+)
+
+add_dependencies(
+    SDKPythonBindings
+    patch_swig_directors
+)
+
 # Generate Python wheel
 set(SETUP_PYTHON_FILE ${CMAKE_CURRENT_LIST_DIR}/setup.py)
 
