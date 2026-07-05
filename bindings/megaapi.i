@@ -1,4 +1,4 @@
-%module(directors="1") mega
+%module(directors="1", threads="1") mega
 %{
 #include "megaapi.h"
 
